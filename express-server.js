@@ -11,8 +11,24 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+function generateRandomString() {
+  // Generates a six-character long string of random alpha-numeric characters
+  const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
+  let random = '';
+  for (let i = 0; i < 6; i++) {
+    let char = Math.floor(Math.random() * (35 - 0 + 1)) + 0;
+    random += alphanum[char];
+  }
+  return random;
+}
+
 app.get('/', (req, res) => {
   res.send("Hello!");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.get('/urls', (req, res) => {
