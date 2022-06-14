@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const app = express();
 
+const app = express();
 const PORT = 8080;
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -56,6 +57,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const { shortURL } = req.params;
+  if (shortURL in urlDatabase) {
+    delete urlDatabase[shortURL];
+  }
+  res.redirect('/');
 });
 
 app.listen(PORT, () => {
