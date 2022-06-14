@@ -31,7 +31,7 @@ app.post("/urls", (req, res) => {
   const { longURL } = req.body;
   const key = generateRandomString();
   urlDatabase[key] = longURL;
-  res.redirect(`/urls/${key}`);         // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${key}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -56,10 +56,6 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
