@@ -23,7 +23,8 @@ function generateRandomString() {
 }
 
 app.get('/', (req, res) => {
-  res.send("Hello!");
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -31,6 +32,12 @@ app.post("/urls", (req, res) => {
   const key = generateRandomString();
   urlDatabase[key] = longURL;
   res.redirect(`/urls/${key}`);         // Respond with 'Ok' (we will replace this)
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const { shortURL } = req.params;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
 });
 
 app.get('/urls', (req, res) => {
