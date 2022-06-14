@@ -11,7 +11,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-function generateRandomString() {
+const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
   const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
   let random = '';
@@ -20,7 +20,7 @@ function generateRandomString() {
     random += alphanum[char];
   }
   return random;
-}
+};
 
 app.get('/', (req, res) => {
   const templateVars = { urls: urlDatabase };
@@ -47,7 +47,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
-})
+});
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
