@@ -10,7 +10,7 @@
         <a class="nav-item nav-link mt-2" href="/urls/new">Create New URL</a>
         <% if(username === undefined) { %>
         <form class="nav-item nav-link form-inline" method="POST" action="/login">
-          <input class="form-control" type="text" name="username" />
+          <input class="form-control" type="text" name="username" placeholder="Username"/>
           <button class="btn btn-primary">Sign In</button>
         </form>
         <% }  else { %>
