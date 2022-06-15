@@ -11,13 +11,13 @@
       </div>
     </div>
     <ul class="navbar-nav ml-auto"></ul>
-    <% if(username === undefined) { %>
+    <% if(user === undefined) { %>
         <form class="nav-item nav-link form-inline" method="POST" action="/login">
           <input class="form-control" type="text" name="username" placeholder="Username"/>
           <button class="btn btn-primary">Sign In</button>
         </form>
       <% }  else { %>
-      <span class="nav-item nav-link">Welcome, <%= username %>!</span>
+      <span class="nav-item nav-link">Welcome, <%= user.email %>!</span>
       <form method="POST" action="/logout" class="nav-item nav-link form-inline"><button class="btn btn-danger">Sign Out</button></form>
       <% } %>
     </ul>
