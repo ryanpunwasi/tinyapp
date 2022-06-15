@@ -13,9 +13,10 @@
     <ul class="navbar-nav ml-auto"></ul>
     <% if(user === undefined) { %>
         <form class="nav-item nav-link form-inline" method="POST" action="/login">
-          <input class="form-control" type="text" name="username" placeholder="Username"/>
+          <input class="form-control mr-2" type="text" name="username" placeholder="Username"/>
           <button class="btn btn-primary">Sign In</button>
         </form>
+        <form action="/register" method="GET"><button class="btn btn-danger">Register</button></form>
       <% }  else { %>
       <span class="nav-item nav-link">Welcome, <%= user.email %>!</span>
       <form method="POST" action="/logout" class="nav-item nav-link form-inline"><button class="btn btn-danger">Sign Out</button></form>
