@@ -26,6 +26,14 @@ const emailExists = (users, email) => {
   return false;
 };
 
+const getIdFromEmail = (users, email) => {
+  for (let user in users) {
+    if(users[user].email === email) {
+      return user;
+    }
+  }
+};
+
 const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
   const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
@@ -109,8 +117,30 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/');
 });
 
+app.get('/login', (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = {
+    urls: urlDatabase,
+    user
+  };
+  res.render("login", templateVars);
+});
+
 app.post('/login', (req, res) => {
-  res.cookie("username", req.body.username);
+  let id;
+  const { email, password } = req.body;
+  if (emailExists(users, email)) {
+    id = getIdFromEmail(users, email);
+    if (password !== users[id].password) {
+      res.status(403).send('Invalid credentials provided.');
+      return;
+    }
+  } else {
+    res.status(403).send('Invalid credentials provided.');
+    return;
+  }
+  res.cookie("user_id", id);
   res.redirect('/urls');
 });
 
