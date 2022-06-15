@@ -14,13 +14,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "a@gmail.com", 
-    password: "123"
-  }
-}
+const users = {};
 
 const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
@@ -106,6 +100,8 @@ app.post('/register', (req, res) => {
     email, 
     password
   };
+  res.cookie("id", id);
+  res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
