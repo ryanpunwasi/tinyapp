@@ -100,7 +100,7 @@ app.post('/register', (req, res) => {
     email, 
     password
   };
-  res.cookie("id", id);
+  res.cookie("user_id", id);
   res.redirect('/urls');
 });
 
