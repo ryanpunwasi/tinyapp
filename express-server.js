@@ -14,6 +14,14 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "a@gmail.com", 
+    password: "123"
+  }
+}
+
 const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
   const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
@@ -83,6 +91,21 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/login', (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"] };
+  res.render("register", templateVars);
+});
+
+app.post('/register', (req, res) => {
+  const { email, password } = req.body;
+  const id = generateRandomString();
+  users.id = {
+    id,
+    email, 
+    password
+  };
 });
 
 app.post('/logout', (req, res) => {
