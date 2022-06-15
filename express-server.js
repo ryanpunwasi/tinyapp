@@ -44,7 +44,6 @@ app.get('/', (req, res) => {
     urls: urlDatabase,
     user
   };
-  console.log("User", users)
   res.render("urls_index", templateVars);
 });
 
@@ -128,8 +127,10 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
   if (email === '' || password === '') {
-    console.log(users);
-    res.sendStatus(400);
+    res.status(400).send('You must provide an email and password!')
+    return;
+  } else if (emailExists(users, email)) {
+    res.status(400).send('The email you provided is being used by another account.')
     return;
   }
   const id = generateRandomString();
@@ -143,7 +144,7 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/');
 });
 
