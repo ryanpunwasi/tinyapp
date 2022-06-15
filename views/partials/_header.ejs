@@ -6,18 +6,20 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link mt-2" href="/urls">My URLs</a>
-        <a class="nav-item nav-link mt-2" href="/urls/new">Create New URL</a>
-        <% if(username === undefined) { %>
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
+    </div>
+    <ul class="navbar-nav ml-auto"></ul>
+    <% if(username === undefined) { %>
         <form class="nav-item nav-link form-inline" method="POST" action="/login">
           <input class="form-control" type="text" name="username" placeholder="Username"/>
           <button class="btn btn-primary">Sign In</button>
         </form>
-        <% }  else { %>
-        <span class="nav-item nav-link mt-2">Welcome, <%= username %></span>
-        <form method="POST" action="/logout" class="nav-item nav-link form-inline"><button class="btn btn-danger">Sign Out</button></form>
-        <% } %>
-      </div>
-    </div>
+      <% }  else { %>
+      <span class="nav-item nav-link">Welcome, <%= username %>!</span>
+      <form method="POST" action="/logout" class="nav-item nav-link form-inline"><button class="btn btn-danger">Sign Out</button></form>
+      <% } %>
+    </ul>
   </nav>
 </header>
