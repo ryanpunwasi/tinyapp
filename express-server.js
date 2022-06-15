@@ -16,6 +16,16 @@ const urlDatabase = {
 
 const users = {};
 
+const emailExists = (users, email) => {
+  for (let user in users) {
+    if(users[user].email === email) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
   const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
@@ -28,10 +38,13 @@ const generateRandomString = () => {
 };
 
 app.get('/', (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user
   };
+  console.log("User", users)
   res.render("urls_index", templateVars);
 });
 
@@ -49,17 +62,32 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = { 
+    urls: urlDatabase,
+    user
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = { 
+    user
+  };
   res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = { 
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -88,14 +116,24 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const templateVars = {urls: urlDatabase, username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = {
+    urls: urlDatabase,
+    user
+  };
   res.render("register", templateVars);
 });
 
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
+  if (email === '' || password === '') {
+    console.log(users);
+    res.sendStatus(400);
+    return;
+  }
   const id = generateRandomString();
-  users.id = {
+  users[id] = {
     id,
     email, 
     password
