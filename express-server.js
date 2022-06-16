@@ -138,13 +138,17 @@ app.get('/urls/new', (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.cookies.user_id;
+  const { shortURL } = req.params;
   if (!id || !id in users) {
     res.send("You must log in to perform that action.");
+    return;
+  } else if (urlDatabase[shortURL].userID !== id) {
+    res.send("Uh oh! Looks like you don't have access to this URL.");
     return;
   }
   const user = users[id];
   const templateVars = { 
-    shortURL: req.params.shortURL,
+    shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user
   };
@@ -152,6 +156,11 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post('/urls/:shortURL', (req, res) => {
+  const id = req.cookies.user_id;
+  if (!(id in users)) {
+    res.status(403).send("You are not authorized to perform this action.")
+    return;
+  }
   const { shortURL } = req.params;
   const { longURL } = req.body;
   urlDatabase[shortURL].longURL = longURL;
@@ -163,6 +172,11 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const id = req.cookies.user_id;
+  if (!(id in users)) {
+    res.status(403).send("You are not authorized to perform this action.")
+    return;
+  }
   const { shortURL } = req.params;
   if (shortURL in urlDatabase) {
     delete urlDatabase[shortURL];
