@@ -1,16 +1,16 @@
 const express = require('express');
-//const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session')
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 require('dotenv').config();
+
+const helper = require('./helpers');
 
 const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: [
@@ -22,83 +22,13 @@ app.use(cookieSession({
 const urlDatabase = {};
 const users = {};
 
-// ===== HELPER FUNCTIONS ===== //
-
-const emailExists = (users, email) => {
-  /* Returns true if email exists in users, where users consists of keys whose values are objects.
-   * Returns false if otherwise.
-   */
-
-  for (let user in users) {
-    if (users[user].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const getIdFromEmail = (users, email) => {
-  /* Returns the userID associated with email in the users object, where users consists of keys whose values are objects.
-   * Returns false if email does not exist in users.
-   */
-
-  for (let user in users) {
-    if (users[user].email === email) {
-      return user;
-    }
-  }
-
-  return false;
-};
-
-const generateRandomString = () => {
-  // Returns a six-character long string of random alpha-numeric characters
-
-  const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
-  const lastIndex = alphanum.length - 1;
-  let random = '';
-
-  for (let i = 0; i < 6; i++) {
-    let char = Math.floor(Math.random() * (lastIndex - 0 + 1)) + 0;
-    random += alphanum[char];
-  }
-
-  return random;
-};
-
-const urlsForUser = (urlDatabase, id) => {
-  /* Returns an object that consists of the key-value pairs in urlDatabase that have a userID equal to id.
-   */
-  let filtered = {};
-
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      filtered[url] = urlDatabase[url];
-    }
-  }
-
-  return filtered;
-};
-
-const getUser = (id) => {
-  /* Returns the value with key id in the global user object. Returns false if id does not exist as a key in users.
-   */
-  if (id in users) {
-    return users[id];
-  }
-
-  return false;
-};
-
-// ===== ROUTE HANDLERS ===== //
-
 app.get('/', (req, res) => {
   const id = req.session.user_id;
   const user = users[id];
   let authError = null;
-  const urls = urlsForUser(urlDatabase, id);
+  const urls = helper.urlsForUser(urlDatabase, id);
 
-  if (id === undefined || !(id in users)) {
+  if (!(helper.getUser(users, id))) {
     authError = 'You must log in to view URLs.';
   }
   
@@ -114,9 +44,9 @@ app.get('/', (req, res) => {
 app.post("/urls", (req, res) => {
   const id = req.session.user_id;
   const { longURL } = req.body;
-  const key = generateRandomString();
+  const key = helper.generateRandomString();
 
-  if (!getUser(id)) {
+  if (!(helper.getUser(users, id))) {
     res.status(403).send("You must log in to perform that action.");
     return;
   }
@@ -152,12 +82,12 @@ app.get('/urls', (req, res) => {
   const user = users[id];
   let authError = null;
 
-  if (!getUser(id)) {
+  if (!helper.getUser(users, id)) {
     authError = 'You must log in to view URLs.';
   }
   
   const templateVars = {
-    urls: urlsForUser(urlDatabase, id),
+    urls: helper.urlsForUser(urlDatabase, id),
     user,
     authError
   };
@@ -169,7 +99,7 @@ app.get('/urls/new', (req, res) => {
   const id = req.session.user_id;
   const user = users[id];
 
-  if (!getUser(id)) {
+  if (!helper.getUser(users, id)) {
     res.redirect('/login');
     return;
   }
@@ -185,9 +115,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
   const id = req.session.user_id;
   const { shortURL, longURL } = req.params;
-  const user = users[id];
+  const user = helper.getUser(users, id);
+  const urlUserID = helper.getShortURLInfo(urlDatabase, shortURL).userID;
 
-  if (!getUser(id)) {
+  if (!user) {
     // Render error page if user is not logged in
     res.render("error", {
       error: "You must log in to view this URL."
@@ -195,7 +126,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
     return;
 
-  } else if (urlDatabase[shortURL].userID !== id) {
+  } else if (urlUserID !== id) {
 
     res.render("error", {
       error: "Uh oh! It looks like you don't have permission to view this URL."
@@ -218,7 +149,7 @@ app.post('/urls/:shortURL', (req, res) => {
   const { shortURL } = req.params;
   const { longURL } = req.body;
 
-  if (!getUser(id)) {
+  if (!helper.getUser(users, id)) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
   }
@@ -235,7 +166,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const id = req.session.user_id;
   const { shortURL } = req.params;
 
-  if (!getUser(id)) {
+  if (!helper.getUser(users, id)) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
   }
@@ -270,10 +201,11 @@ app.post('/login', (req, res) => {
   let id;
   const { email, password } = req.body;
 
-  if (emailExists(users, email)) {
-    id = getIdFromEmail(users, email);
-
-    if (!(bcrypt.compareSync(password, users[id].password))) {
+  if (helper.emailExists(users, email)) {
+    id = helper.getUserByEmail(email, users).id;
+    const dbPassword  = helper.getUserByEmail(email, users).password;
+    
+    if (!(bcrypt.compareSync(password, dbPassword))) {
       res.status(403).send('Invalid credentials provided.');
       return;
     }
@@ -309,7 +241,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
-  const id = generateRandomString();
+  const id = helper.generateRandomString();
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (!email || !password) {
@@ -317,7 +249,7 @@ app.post('/register', (req, res) => {
     res.status(400).send('You must provide an email and password!');
     return;
 
-  } else if (emailExists(users, email)) {
+  } else if (helper.emailExists(users, email)) {
 
     res.status(400).send('The email you provided is being used by another account.');
     return;
