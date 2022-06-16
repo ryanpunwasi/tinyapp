@@ -1,14 +1,23 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
+require('dotenv').config();
 
 const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+//app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: [
+    process.env.KEY_1,
+    process.env.KEY_2
+  ]
+}));
 
 const urlDatabase = {};
 const users = {};
@@ -84,8 +93,7 @@ const getUser = (id) => {
 // ===== ROUTE HANDLERS ===== //
 
 app.get('/', (req, res) => {
-
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
   let authError = null;
   const urls = urlsForUser(urlDatabase, id);
@@ -104,7 +112,7 @@ app.get('/', (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const { longURL } = req.body;
   const key = generateRandomString();
 
@@ -140,7 +148,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
   let authError = null;
 
@@ -158,7 +166,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
 
   if (!getUser(id)) {
@@ -175,7 +183,7 @@ app.get('/urls/new', (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
 
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const { shortURL, longURL } = req.params;
   const user = users[id];
 
@@ -206,7 +214,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post('/urls/:shortURL', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const { shortURL } = req.params;
   const { longURL } = req.body;
 
@@ -224,7 +232,7 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const { shortURL } = req.params;
 
   if (!getUser(id)) {
@@ -240,7 +248,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
 
   if (id in users) {
@@ -276,12 +284,12 @@ app.post('/login', (req, res) => {
 
   }
 
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   res.redirect('/urls');
 });
 
 app.get('/register', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
 
   if (id in users) {
@@ -322,13 +330,13 @@ app.post('/register', (req, res) => {
     password: hashedPassword
   };
 
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
 
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/');
   
 });
