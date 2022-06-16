@@ -6,7 +6,7 @@ const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // const urlDatabase = {
@@ -58,10 +58,15 @@ const generateRandomString = () => {
 
 app.get('/', (req, res) => {
   const id = req.cookies.user_id;
+  let authError = null;
+  if (!id || !id in users) {
+    authError = 'You must log in to view URLs.';
+  }
   const user = users[id];
   const templateVars = {
     urls: urlDatabase,
-    user
+    user,
+    authError
   };
   res.render("urls_index", templateVars);
 });
@@ -94,10 +99,15 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get('/urls', (req, res) => {
   const id = req.cookies.user_id;
+  let authError = null;
+  if (!id || !id in users) {
+    authError = 'You must log in to view URLs.';
+  }
   const user = users[id];
   const templateVars = { 
     urls: urlDatabase,
-    user
+    user,
+    authError
   };
   res.render("urls_index", templateVars);
 });
