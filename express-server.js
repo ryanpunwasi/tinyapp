@@ -206,12 +206,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post('/urls/:shortURL', (req, res) => {
   const id = req.cookies.user_id;
-  if (!(id in users)) {
+  const { shortURL } = req.params;
+  const { longURL } = req.body;
+
+  if (!getUser(id)) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
   }
-  const { shortURL } = req.params;
-  const { longURL } = req.body;
+
   urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/`);
 });
@@ -222,84 +224,111 @@ app.get('/urls.json', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const id = req.cookies.user_id;
-  if (!(id in users)) {
+  const { shortURL } = req.params;
+
+  if (!getUser(id)) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
   }
-  const { shortURL } = req.params;
+
   if (shortURL in urlDatabase) {
     delete urlDatabase[shortURL];
   }
+
   res.redirect('/');
 });
 
 app.get('/login', (req, res) => {
   const id = req.cookies.user_id;
+  const user = users[id];
+
   if (id in users) {
+
     res.redirect('/urls');
     return;
+
   }
-  const user = users[id];
+
   const templateVars = {
     urls: urlDatabase,
     user
   };
+
   res.render("login", templateVars);
 });
 
 app.post('/login', (req, res) => {
   let id;
   const { email, password } = req.body;
+
   if (emailExists(users, email)) {
     id = getIdFromEmail(users, email);
+
     if (password !== users[id].password) {
       res.status(403).send('Invalid credentials provided.');
       return;
     }
   } else {
+
     res.status(403).send('Invalid credentials provided.');
     return;
+
   }
+
   res.cookie("user_id", id);
   res.redirect('/urls');
 });
 
 app.get('/register', (req, res) => {
   const id = req.cookies.user_id;
+  const user = users[id];
+
   if (id in users) {
+
     res.redirect('/urls');
     return;
+
   }
-  const user = users[id];
+  
   const templateVars = {
     urls: urlDatabase,
     user
   };
+
   res.render("register", templateVars);
 });
 
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
-  if (email === '' || password === '') {
+  const id = generateRandomString();
+
+  if (!email || !password) {
+
     res.status(400).send('You must provide an email and password!');
     return;
+
   } else if (emailExists(users, email)) {
+
     res.status(400).send('The email you provided is being used by another account.');
     return;
+
   }
-  const id = generateRandomString();
+  
   users[id] = {
     id,
     email,
     password
   };
+
   res.cookie("user_id", id);
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
+
   res.clearCookie('user_id');
   res.redirect('/');
+  
 });
 
 app.listen(PORT, () => {
