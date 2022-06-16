@@ -56,6 +56,17 @@ const generateRandomString = () => {
   return random;
 };
 
+const urlsForUser = (urlDatabase, id) => {
+  let filtered = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      filtered[url] = urlDatabase[url];
+    }
+  }
+
+  return filtered;
+}
+
 app.get('/', (req, res) => {
   const id = req.cookies.user_id;
   let authError = null;
@@ -64,7 +75,7 @@ app.get('/', (req, res) => {
   }
   const user = users[id];
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(urlDatabase, id),
     user,
     authError
   };
@@ -105,7 +116,7 @@ app.get('/urls', (req, res) => {
   }
   const user = users[id];
   const templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(urlDatabase, id),
     user,
     authError
   };
@@ -127,6 +138,10 @@ app.get('/urls/new', (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.cookies.user_id;
+  if (!id || !id in users) {
+    res.send("You must log in to perform that action.");
+    return;
+  }
   const user = users[id];
   const templateVars = { 
     shortURL: req.params.shortURL,
