@@ -9,37 +9,27 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
-const urlDatabase = {
-  b6UTxQ: {
-        longURL: "https://www.tsn.ca",
-        userID: "aJ48lW"
-    },
-    i3BoGr: {
-        longURL: "https://www.google.ca",
-        userID: "aJ48lW"
-    }
-};
-
+const urlDatabase = {};
 const users = {};
 
+// ===== HELPER FUNCTIONS ===== //
+
 const emailExists = (users, email) => {
+  /* Returns true if email exists in users, where users consists of keys whose values are objects.
+   * Returns false if otherwise.
+   */
+
   for (let user in users) {
-    if(users[user].email === email) {
+    if (users[user].email === email) {
       return true;
     }
   }
-
   return false;
 };
 
 const getIdFromEmail = (users, email) => {
   for (let user in users) {
-    if(users[user].email === email) {
+    if (users[user].email === email) {
       return user;
     }
   }
@@ -49,6 +39,7 @@ const generateRandomString = () => {
   // Generates a six-character long string of random alpha-numeric characters
   const alphanum = 'abcdefghigklmnopqrstuvwxyz1234567890';
   let random = '';
+
   for (let i = 0; i < 6; i++) {
     let char = Math.floor(Math.random() * (35 - 0 + 1)) + 0;
     random += alphanum[char];
@@ -58,19 +49,23 @@ const generateRandomString = () => {
 
 const urlsForUser = (urlDatabase, id) => {
   let filtered = {};
+
   for (let url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
       filtered[url] = urlDatabase[url];
     }
   }
-
   return filtered;
-}
+};
+
+// ===== ROUTE HANDLERS ===== //
 
 app.get('/', (req, res) => {
+
   const id = req.cookies.user_id;
   let authError = null;
-  if (!id || !id in users) {
+
+  if (id === undefined || !(id in users)) {
     authError = 'You must log in to view URLs.';
   }
   const user = users[id];
@@ -84,7 +79,7 @@ app.get('/', (req, res) => {
 
 app.post("/urls", (req, res) => {
   const id = req.cookies.user_id;
-  if (!id || !id in users) {
+  if (id === undefined || !(id in users)) {
     res.status(403).send("You must log in to perform that action.");
     return;
   }
@@ -111,11 +106,11 @@ app.get("/u/:shortURL", (req, res) => {
 app.get('/urls', (req, res) => {
   const id = req.cookies.user_id;
   let authError = null;
-  if (!id || !id in users) {
+  if (!(id) || !(id in users)) {
     authError = 'You must log in to view URLs.';
   }
   const user = users[id];
-  const templateVars = { 
+  const templateVars = {
     urls: urlsForUser(urlDatabase, id),
     user,
     authError
@@ -125,12 +120,12 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
-  if (!id || !id in users) {
+  if (!(id) || !(id in users)) {
     res.redirect('/login');
     return;
   }
   const user = users[id];
-  const templateVars = { 
+  const templateVars = {
     user
   };
   res.render('urls_new', templateVars);
@@ -139,7 +134,7 @@ app.get('/urls/new', (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.cookies.user_id;
   const { shortURL } = req.params;
-  if (!id || !id in users) {
+  if (!(id) || !(id in users)) {
     res.send("You must log in to perform that action.");
     return;
   } else if (urlDatabase[shortURL].userID !== id) {
@@ -147,7 +142,7 @@ app.get("/urls/:shortURL", (req, res) => {
     return;
   }
   const user = users[id];
-  const templateVars = { 
+  const templateVars = {
     shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user
@@ -158,7 +153,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const id = req.cookies.user_id;
   if (!(id in users)) {
-    res.status(403).send("You are not authorized to perform this action.")
+    res.status(403).send("You are not authorized to perform this action.");
     return;
   }
   const { shortURL } = req.params;
@@ -174,7 +169,7 @@ app.get('/urls.json', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   const id = req.cookies.user_id;
   if (!(id in users)) {
-    res.status(403).send("You are not authorized to perform this action.")
+    res.status(403).send("You are not authorized to perform this action.");
     return;
   }
   const { shortURL } = req.params;
@@ -232,16 +227,16 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
   if (email === '' || password === '') {
-    res.status(400).send('You must provide an email and password!')
+    res.status(400).send('You must provide an email and password!');
     return;
   } else if (emailExists(users, email)) {
-    res.status(400).send('The email you provided is being used by another account.')
+    res.status(400).send('The email you provided is being used by another account.');
     return;
   }
   const id = generateRandomString();
   users[id] = {
     id,
-    email, 
+    email,
     password
   };
   res.cookie("user_id", id);
