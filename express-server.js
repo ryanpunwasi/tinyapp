@@ -152,20 +152,23 @@ app.get('/urls', (req, res) => {
     user,
     authError
   };
-  
+
   res.render("urls_index", templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
+  const user = users[id];
+  
   if (!(id) || !(id in users)) {
     res.redirect('/login');
     return;
   }
-  const user = users[id];
+
   const templateVars = {
     user
   };
+
   res.render('urls_new', templateVars);
 });
 
