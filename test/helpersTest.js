@@ -4,7 +4,10 @@ const {
   getUserByEmail,
   emailExists,
   getIdFromEmail,
-  generateRandomString
+  generateRandomString,
+  urlsForUser,
+  getShortURLInfo,
+  getUser
 } = require('../helpers.js');
 
 const testUsers = {
@@ -18,6 +21,17 @@ const testUsers = {
     email: "user2@example.com", 
     password: "dishwasher-funk"
   }
+};
+
+const testUrlDatabase = {
+  b6UTxQ: {
+        longURL: "https://www.tsn.ca",
+        userID: "aJ48lW"
+    },
+    i3BoGr: {
+        longURL: "https://www.google.ca",
+        userID: "aJ48lQ"
+    }
 };
 
 describe('getUserByEmail', function() {
@@ -73,4 +87,51 @@ describe('getIdFromEmail', function() {
       const expected = 6;
       assert.equal(actual, expected);
     });
-});
+  });
+
+  describe('urlsForUser', function() {
+    it('should return user object(s) if database contains url(s) associated with given id', function() {
+      const actual = Object.keys(urlsForUser(testUrlDatabase, 'aJ48lW'));
+      const expected = ['b6UTxQ'];
+      assert.deepEqual(actual, expected);
+    });
+  
+    it('should return an empty object if database does not contain url(s) associated with given id', function() {
+      const actual = urlsForUser(testUrlDatabase, 'notfound');
+      const expected = {};
+      assert.deepEqual(actual, expected);
+    });
+  });
+
+  describe('getShortURLInfo', function() {
+    it('should return url object if database contains url associated with given shortURL', function() {
+      const actual = getShortURLInfo(testUrlDatabase, 'i3BoGr');
+      const expected = {
+        longURL: "https://www.google.ca",
+        userID: "aJ48lQ"
+      };
+      assert.deepEqual(actual, expected);
+    });
+  
+    it('should return undefined if database does not contain url associated with given shortURL', function() {
+      const actual = getShortURLInfo(testUrlDatabase, 'notfound');
+      assert.isUndefined(actual);
+    });
+  });
+
+  describe('getUser', function() {
+    it('should return user object if database contains user associated with given id', function() {
+      const actual = getUser(testUsers, "userRandomID");
+      const expected = {
+        id: "userRandomID", 
+        email: "user@example.com", 
+        password: "purple-monkey-dinosaur"
+      };
+      assert.deepEqual(actual, expected);
+    });
+  
+    it('Returns false if id does not exist as a key in users', function() {
+      const actual = getUser(testUsers, 'notfound');
+      assert.isFalse(actual);
+    });
+  });
