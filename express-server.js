@@ -122,13 +122,20 @@ app.post("/urls", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
+
   if (!(shortURL in urlDatabase)) {
-    res.send("Invalid address.");
+    
+    // Render error page if short url doesn't exist
+    res.render("error", {
+      error: "Whoops! That short url doesn't exist..."
+    });
+
     return;
   }
 
   const { longURL } = urlDatabase[shortURL];
   res.redirect(longURL);
+
 });
 
 app.get('/urls', (req, res) => {
