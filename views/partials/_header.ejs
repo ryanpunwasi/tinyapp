@@ -16,7 +16,7 @@
           <button class="btn btn-outline-primary font-weight-bold">Log In</button>
         </form>
         <form action="/register" method="GET"><button class="btn btn-outline-danger font-weight-bold">Register</button></form>
-      <% }  else { %>
+      <% } else { %>
       <span class="nav-item nav-link text-light">Welcome, <%= user.email %>!</span>
       <form method="POST" action="/logout" class="nav-item nav-link form-inline"><button class="btn btn-danger">Sign Out</button></form>
       <% } %>
