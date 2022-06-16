@@ -75,17 +75,20 @@ const urlsForUser = (urlDatabase, id) => {
 app.get('/', (req, res) => {
 
   const id = req.cookies.user_id;
+  const user = users[id];
   let authError = null;
-
+  const urls = urlsForUser(urlDatabase, id);
+  
   if (id === undefined || !(id in users)) {
     authError = 'You must log in to view URLs.';
   }
-  const user = users[id];
+  
   const templateVars = {
-    urls: urlsForUser(urlDatabase, id),
+    urls,
     user,
     authError
   };
+
   res.render("urls_index", templateVars);
 });
 
