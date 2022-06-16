@@ -124,7 +124,7 @@ app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
 
   if (!(shortURL in urlDatabase)) {
-    
+
     // Render error page if short url doesn't exist
     res.render("error", {
       error: "Whoops! That short url doesn't exist..."
@@ -140,16 +140,19 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get('/urls', (req, res) => {
   const id = req.cookies.user_id;
+  const user = users[id];
   let authError = null;
-  if (!(id) || !(id in users)) {
+
+  if (!getUser(id)) {
     authError = 'You must log in to view URLs.';
   }
-  const user = users[id];
+  
   const templateVars = {
     urls: urlsForUser(urlDatabase, id),
     user,
     authError
   };
+  
   res.render("urls_index", templateVars);
 });
 
