@@ -70,6 +70,16 @@ const urlsForUser = (urlDatabase, id) => {
   return filtered;
 };
 
+const getUser = (id) => {
+  /* Returns the value with key id in the global user object. Returns false if id does not exist as a key in users.
+   */
+  if (id in users) {
+    return users[id];
+  }
+
+  return false;
+};
+
 // ===== ROUTE HANDLERS ===== //
 
 app.get('/', (req, res) => {
@@ -78,7 +88,7 @@ app.get('/', (req, res) => {
   const user = users[id];
   let authError = null;
   const urls = urlsForUser(urlDatabase, id);
-  
+
   if (id === undefined || !(id in users)) {
     authError = 'You must log in to view URLs.';
   }
@@ -94,16 +104,19 @@ app.get('/', (req, res) => {
 
 app.post("/urls", (req, res) => {
   const id = req.cookies.user_id;
-  if (id === undefined || !(id in users)) {
+  const { longURL } = req.body;
+  const key = generateRandomString();
+
+  if (!getUser(id)) {
     res.status(403).send("You must log in to perform that action.");
     return;
   }
-  const { longURL } = req.body;
-  const key = generateRandomString();
+
   urlDatabase[key] = {
     longURL,
     userID: id
   };
+
   res.redirect(`/urls/${key}`);
 });
 
