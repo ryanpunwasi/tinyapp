@@ -191,7 +191,8 @@ app.get('/login', (req, res) => {
 
   const templateVars = {
     urls: urlDatabase,
-    user
+    user,
+    error: null
   };
 
   res.render("login", templateVars);
@@ -206,12 +207,21 @@ app.post('/login', (req, res) => {
     const dbPassword  = helper.getUserByEmail(email, users).password;
     
     if (!(bcrypt.compareSync(password, dbPassword))) {
-      res.status(403).send('Invalid credentials provided.');
+      res.status(403).render('login',
+        { 
+          error: 'Invalid credentials provided.',
+          user: id
+        }
+      );
       return;
     }
   } else {
 
-    res.status(403).send('Invalid credentials provided.');
+    res.status(403).render('login', { 
+      error: 'Invalid credentials provided.',
+      user: id
+    });
+    
     return;
 
   }
