@@ -159,8 +159,8 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
-  
-  if (!(id) || !(id in users)) {
+
+  if (!getUser(id)) {
     res.redirect('/login');
     return;
   }
@@ -173,21 +173,34 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+
   const id = req.cookies.user_id;
-  const { shortURL } = req.params;
-  if (!(id) || !(id in users)) {
-    res.send("You must log in to perform that action.");
+  const { shortURL, longURL } = req.params;
+  const user = users[id];
+
+  if (!getUser(id)) {
+    // Render error page if user is not logged in
+    res.render("error", {
+      error: "You must log in to view this URL."
+    });
+
     return;
+
   } else if (urlDatabase[shortURL].userID !== id) {
-    res.send("Uh oh! Looks like you don't have access to this URL.");
+
+    res.render("error", {
+      error: "Uh oh! It looks like you don't have permission to view this URL."
+    });
+
     return;
   }
-  const user = users[id];
+  
   const templateVars = {
     shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
+    longURL,
     user
   };
+
   res.render("urls_show", templateVars);
 });
 
