@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
 
 const app = express();
 const PORT = 8080;
@@ -264,7 +265,7 @@ app.post('/login', (req, res) => {
   if (emailExists(users, email)) {
     id = getIdFromEmail(users, email);
 
-    if (password !== users[id].password) {
+    if (!(bcrypt.compareSync(password, users[id].password))) {
       res.status(403).send('Invalid credentials provided.');
       return;
     }
@@ -301,6 +302,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
   const id = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (!email || !password) {
 
@@ -317,7 +319,7 @@ app.post('/register', (req, res) => {
   users[id] = {
     id,
     email,
-    password
+    password: hashedPassword
   };
 
   res.cookie("user_id", id);
