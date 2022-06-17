@@ -37,11 +37,15 @@ app.get('/', (req, res) => {
 
 app.post("/urls", (req, res) => {
   const id = req.session.user_id;
-  const { longURL } = req.body;
+  const { longURL, shortURL } = req.body;
   const key = helper.generateRandomString();
-
-  if (!(helper.getUser(users, id))) {
+  const user = helper.getUser(users, id);
+  const usersUrls = helper.urlsForUser(urlDatabase, id);
+  if (!user) {
     res.status(403).send("You must log in to perform that action.");
+    return;
+  } else if (usersUrls[shortURL]) {
+    res.status(403).send("You don't have permission to edit this URL.");
     return;
   }
 
@@ -108,9 +112,11 @@ app.get('/urls/new', (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
 
   const id = req.session.user_id;
-  const { shortURL, longURL } = req.params;
+  const { shortURL } = req.params;
   const user = helper.getUser(users, id);
-  const urlUserID = helper.getShortURLInfo(urlDatabase, shortURL).userID;
+  const urlInfo = helper.getShortURLInfo(urlDatabase, shortURL) || {};
+  const urlUserID = urlInfo.userID;
+  const longURL  = urlInfo.longURL;
 
   if (!user) {
     // Render error page if user is not logged in
@@ -123,7 +129,7 @@ app.get("/urls/:shortURL", (req, res) => {
   } else if (urlUserID !== id) {
 
     res.render("error", {
-      error: "Uh oh! It looks like you don't have permission to view this URL."
+      error: "Uh oh! Either this URL doesn't exist or you don't have permission to view it."
     });
 
     return;
