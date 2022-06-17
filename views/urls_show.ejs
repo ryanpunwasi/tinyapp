@@ -17,7 +17,8 @@
     <div class="card-footer text-muted">
       <form action="/urls/<%= shortURL %>" method="POST">
           <label for="longURL">New URL: </label>
-          <input type="text" name="longURL" value='http://'/>
+          <input type="text" name="longURL" value=<%= longURL %>/>
+          <input type="hidden" name="shortURL" value=<%= shortURL %>/>
           <button type="submit" class="btn btn-success">Submit</button>
       </form>
     </div>
