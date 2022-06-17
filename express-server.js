@@ -165,8 +165,10 @@ app.get('/urls.json', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   const id = req.session.user_id;
   const { shortURL } = req.params;
-
-  if (!helper.getUser(users, id)) {
+  const usersUrls = helper.urlsForUser(urlDatabase, id);
+  const urlOwnerID = usersUrls.userID;
+  
+  if (!(helper.getUser(users, id)) || urlOwnerID !== id) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
   }
@@ -175,7 +177,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[shortURL];
   }
 
-  res.redirect('/');
+  res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
