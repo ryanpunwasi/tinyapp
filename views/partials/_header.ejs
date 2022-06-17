@@ -10,7 +10,7 @@
       </div>
     </div>
     <ul class="navbar-nav ml-auto"></ul>
-    <% if(user === undefined) { %>
+    <% if(!user) { %>
         <form class="nav-item nav-link form-inline" method="GET" action="/login">
           <button class="btn btn-outline-primary font-weight-bold">Log In</button>
         </form>
