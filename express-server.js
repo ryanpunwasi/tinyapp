@@ -2,7 +2,6 @@ const express = require('express'); // Express library
 const cookieSession = require('cookie-session'); // Create encrypted cookie sessions
 const bodyParser = require("body-parser"); // Parse HTTP POST requests
 const bcrypt = require("bcryptjs"); // Hashing library
-require('dotenv').config(); // Loads environment variables from .env
 
 const helper = require('./helpers'); // Helper functions
 
@@ -16,8 +15,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
   keys: [
-    process.env.KEY_1,
-    process.env.KEY_2
+    'hOTHabaCkyraceRgUmostenagmurEyMNavaCrAINbOyDrebRAIRosiatIvERnoMAtUetAdlERopHandEBElTeDEScolwhEtESTE',
+    'NchentiOUSTlEtaBlIgNuLAPHOthItcHIETeUMEDAtinaUlaroalPhesTRaGeriCamATIOUdecaDefuLtzecodIeLagOuStoLcI'
   ]
 }));
 
