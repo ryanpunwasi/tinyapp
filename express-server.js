@@ -1,5 +1,5 @@
 const express = require('express');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 require('dotenv').config();
@@ -24,9 +24,6 @@ const users = {};
 
 app.get('/', (req, res) => {
   const id = req.session.user_id;
-  const user = users[id];
-  let authError = null;
-  const urls = helper.urlsForUser(urlDatabase, id);
 
   if (!(helper.getUser(users, id))) {
     return res.redirect('/login');
@@ -167,7 +164,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const { shortURL } = req.params;
   const usersUrls = helper.urlsForUser(urlDatabase, id);
   const urlOwnerID = usersUrls.userID;
-  
+
   if (!(helper.getUser(users, id)) || urlOwnerID !== id) {
     res.status(403).send("You are not authorized to perform this action.");
     return;
@@ -210,7 +207,7 @@ app.post('/login', (req, res) => {
     
     if (!(bcrypt.compareSync(password, dbPassword))) {
       res.status(403).render('login',
-        { 
+        {
           error: 'Invalid credentials provided.',
           user: id
         }
@@ -219,7 +216,7 @@ app.post('/login', (req, res) => {
     }
   } else {
 
-    res.status(403).render('login', { 
+    res.status(403).render('login', {
       error: 'Invalid credentials provided.',
       user: id
     });
@@ -256,7 +253,7 @@ app.post('/register', (req, res) => {
   const id = helper.generateRandomString();
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (!email || !password) {
+  if (!email.trim() || !password) {
 
     res.status(400).send('You must provide an email and password!');
     return;
