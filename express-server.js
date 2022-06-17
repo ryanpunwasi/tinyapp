@@ -191,7 +191,6 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 app.get('/login', (req, res) => {
   const id = req.session.user_id;
-  const user = users[id];
 
   // Redirect if user is logged in already
   if (id in users) {
@@ -203,7 +202,7 @@ app.get('/login', (req, res) => {
 
   const templateVars = {
     urls: urlDatabase,
-    user,
+    user: null,
     error: null
   };
 
@@ -225,20 +224,17 @@ app.post('/login', (req, res) => {
       res.status(403).render('login',
         {
           error: 'Invalid credentials provided.',
-          user: id
+          user: null
         }
       );
       return;
     }
   } else {
     // Send 403 if email does not exist
-    res.status(403).render('login', {
+    return res.status(403).render('login', {
       error: 'Invalid credentials provided.',
       user: id
     });
-
-    return;
-
   }
 
   req.session.user_id = id;
