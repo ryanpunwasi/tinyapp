@@ -29,16 +29,10 @@ app.get('/', (req, res) => {
   const urls = helper.urlsForUser(urlDatabase, id);
 
   if (!(helper.getUser(users, id))) {
-    authError = 'You must log in to view URLs.';
+    return res.redirect('/login');
+  } else {
+    return res.redirect('/urls');
   }
-  
-  const templateVars = {
-    urls,
-    user,
-    authError
-  };
-
-  res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -221,7 +215,7 @@ app.post('/login', (req, res) => {
       error: 'Invalid credentials provided.',
       user: id
     });
-    
+
     return;
 
   }
